@@ -11,10 +11,11 @@ if(localStorage.getItem('todo')){  //получаем данные с localStora
 }
 
 addButton.addEventListener('click', function(){ //отслеживаем клик по кнопке добавить
+    if(!addMessage.value) return;                
     let newTodo = {
-        todo:addMessage.value, //значение дела
-        checked: false,         //дело выполнено или нет
-        important: false
+        todo:addMessage.value,                  //значение дела
+        checked: false,                         //дело выполнено или нет
+        important: false                        // важность дела
     }
 
     todoList.push(newTodo);
@@ -22,6 +23,7 @@ addButton.addEventListener('click', function(){ //отслеживаем кли�
 
     localStorage.setItem('todo', JSON.stringify(todoList));
     addMessage.value = '';
+
 });
 
 function displayMessages(){  //выводим список дел
@@ -31,7 +33,7 @@ function displayMessages(){  //выводим список дел
             <li>
                 <input type='checkbox' id ='item_${i}' ${item.checked ? 'checked':''}>
                 <label for='item_${i}' class = "${item.important ? 'important' : ''}">${item.todo}</label>
-                <button class="btnDelete" onclick = 'deleteButton(item_${i})'>удалить</button>    
+                <button class="btnDelete" data-action="delete">удалить</button>    
                                    
             </li>
         `
@@ -67,30 +69,27 @@ todo.addEventListener('contextmenu', function(event){ //добавляем вы�
 
 // delete
 
-function deleteButton(i){
+todo.addEventListener('click', deleteTask) // ставим прослушку на клик по списку
 
-    let del = document.querySelector('#i')
-   localStorage.clear();
+function deleteTask(event){
+    if(event.target.dataset.action === 'delete')  {//если нажали по кнопке 'удалить', удаляем  задачу
+        let parentNode = event.target.closest('li');//ищем родительский 'li'
 
+        let label = parentNode.querySelector('li > label')//вытаскиваем  label 
+
+        let labelValue = label.innerHTML; // получаем значение нашей задачи(которую надо удалить)
+
+        todoList.forEach(function(item, i){
+
+            if(item.todo === labelValue){
+                todoList.splice(i,1);//удаляем задачу из нашего списка
+                localStorage.setItem('todo', JSON.stringify(todoList));//перезаписываем в localStorage оставшиеся задачи 
+            }
+        })
+      
+        parentNode.remove();
+    }
 }
 
-
-
-
-
-// let del =  document.querySelector('.btnDelete');
-
-// del.addEventListener('click',function(event){
-//     console.log(del)
-
-//     todoList.forEach(function(item,i){
-//         if(item.todo === event.target){
-//             todoList.splice(i,1)
-//             displayMessages();
-//             localStorage.setItem('todo', JSON.stringify(todoList));
-//         }
-//     })
-// })
-// ______________________________
 
 
